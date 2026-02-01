@@ -112,10 +112,9 @@ namespace ReceiptSharp.Printers
             }
             if (lang.Length > 0)
             {
-                lang = " xml:lang=\"" + lang + "\"";
+                lang = " lang=\"" + lang + "\"";
             }
-            return $"<svg width=\"{SvgWidth}px\" height=\"{SvgHeight}px\" viewBox=\"0 0 {SvgWidth} {SvgHeight}\" preserveAspectRatio=\"xMinYMin meet\" " +
-                $"xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\">{style}" +
+            return $"<svg width=\"{SvgWidth}px\" height=\"{SvgHeight}px\" viewBox=\"0 0 {SvgWidth} {SvgHeight}\" preserveAspectRatio=\"xMinYMin meet\" xmlns=\"http://www.w3.org/2000/svg\">{style}" +
                 $"<defs><filter id=\"receipt-{ReceiptId}\" x=\"0\" y=\"0\" width=\"100%\" height=\"100%\"><feFlood flood-color=\"#000\"/><feComposite in2=\"SourceGraphic\" operator=\"out\"/></filter></defs>" +
                 $"<g font-family=\"{font}\" fill=\"#000\" font-size=\"{size}\" dominant-baseline=\"text-after-edge\" text-anchor=\"middle\"{lang}>{SvgContent}</g></svg>\n";
         }
@@ -284,7 +283,7 @@ namespace ReceiptSharp.Printers
                 imgWidth = png[16] << 24 | png[17] << 16 | png[18] << 8 | png[19];
                 imgHeight = png[20] << 24 | png[21] << 16 | png[22] << 8 | png[23];
             }
-            string imgData = $"<image xlink:href=\"data:image/png;base64,{image}\" x=\"0\" y=\"0\" width=\"{imgWidth}\" height=\"{imgHeight}\"/>";
+            string imgData = $"<image href=\"data:image/png;base64,{image}\" x=\"0\" y=\"0\" width=\"{imgWidth}\" height=\"{imgHeight}\"/>";
             int margin = LineMargin * CharWidth + (LineWidth * CharWidth - imgWidth) * LineAlign / 2;
             SvgContent += $"<g transform=\"translate({margin},{SvgHeight})\">{imgData}</g>";
             SvgHeight += imgHeight;
@@ -306,11 +305,11 @@ namespace ReceiptSharp.Printers
                     {
                         if (matrix[y, x] == 1)
                         {
-                            path += $"M{x * c},{y * c}l{c},0 0,{c} -{c},0 0,-{c}z ";
+                            path += $"M{x * c},{y * c}l{c},0 0,{c} -{c},0 0,-{c}z";
                         }
                     }
                 }
-                path += "\" stroke=\"transparent\" fill=\"black\"/>";
+                path += "\" stroke=\"transparent\" fill=\"#000\"/>";
                 int margin = LineMargin * CharWidth + (LineWidth * CharWidth - w * c) * LineAlign / 2;
                 SvgContent += $"<g transform=\"translate({margin},{SvgHeight})\">{path}</g>";
                 SvgHeight += h * c;
