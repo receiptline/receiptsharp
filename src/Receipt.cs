@@ -20,14 +20,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Text;
+using SkiaSharp;
+using Svg;
+using Svg.Skia;
 using ReceiptSharp.Printers;
-using System.Threading.Tasks;
-//using System.Threading.Tasks;
-//using Microsoft.Playwright;
-//using PuppeteerSharp;
-//using PuppeteerSharp.BrowserData;
 
 namespace ReceiptSharp
 {
@@ -73,7 +72,7 @@ namespace ReceiptSharp
         public string ToSvg()
         {
             PrintOption options = Options.Clone();
-            options.Command = new Svg();
+            options.Command = new ReceiptSharp.Printers.Svg();
             return Transform(Markdown, options);
         }
 
@@ -83,7 +82,7 @@ namespace ReceiptSharp
          */
         public string ToPng()
         {
-            return Base64Png(ToSvg()).Result;
+            return Base64Png(ToSvg());
         }
 
         /**
@@ -101,7 +100,7 @@ namespace ReceiptSharp
                     options.Margin = 0;
                     options.MarginRight = 0;
                 }
-                string png = Base64Png(ToSvg(), Options).Result;
+                string png = Base64Png(ToSvg(), Options);
                 options.Command = CreatePrinter(options.Type);
                 return Encoding.GetEncoding("ISO-8859-1").GetBytes(Transform("{i:" + Regex.Replace(png, @"^data:.*,", "") + "}", options));
             }
@@ -1000,71 +999,144 @@ namespace ReceiptSharp
             };
         }
 
-        /*
-        // Playwright
-        private async Task<string> Base64Png(string svg, PrintOption options = null)
+        private static readonly Assembly Asm = typeof(Receipt).Assembly;
+        private static SKTypeface GetTypeface(string name)
         {
-            string png = "";
-            int c = Svg.CharWidth;
-            Match match = Regex.Match(svg, @"width=""(\d+)px"" height=""(\d+)px""");
-            if (match.Success)
+            return SKTypeface.FromStream(Asm.GetManifestResourceStream($"{Asm.GetName().Name}.{name}"));
+        }
+        private static readonly Dictionary<string, SKTypeface> Typefaces = new Dictionary<string, SKTypeface>()
+        {
+            { "en", GetTypeface("src.Fonts.en.CourierPrime-Regular.ttf") },
+            { "ja", GetTypeface("src.Fonts.ja.BIZUDGothic-Regular.ttf") },
+            { "ko", GetTypeface("src.Fonts.ko.NotoSansMonoCJKkr-Regular.otf") },
+            { "zh-hans", GetTypeface("src.Fonts.zh.NotoSansMonoCJKsc-Regular.otf") },
+            { "zh-hant", GetTypeface("src.Fonts.zh.NotoSansMonoCJKtc-Regular.otf") },
+            { "th", GetTypeface("src.Fonts.th.Sarabun-Regular.ttf") }
+        };
+
+        private string Base64Png(string svg, PrintOption options = null)
+        {
+            IPrinter printer = new ReceiptSharp.Printers.Svg();
+            int c = printer.CharWidth;
+            int m = (options?.Margin ?? 0) * c;
+            int n = (options?.MarginRight ?? 0) * c;
+
+            // <svg>
+            var doc = SvgDocument.FromSvg<SvgDocument>(svg);
+            int width = (int)doc.Width.Value;
+            int height = (int)doc.Height.Value;
+            int cw, ch;
+            if (options?.Landscape ?? false)
             {
-                int.TryParse(match.Groups[1].Value, out int w);
-                int.TryParse(match.Groups[2].Value, out int h);
-                string t = "";
+                cw = height;
+                ch = width + m + n;
+            }
+            else
+            {
+                cw = width;
+                ch = height;
+            }
+            var info = new SKImageInfo(cw, ch, SKColorType.Rgba8888, SKAlphaType.Premul);
+            using (var surface = SKSurface.Create(info))
+            {
+                var canvas = surface.Canvas;
+                canvas.Clear(SKColors.Transparent);
                 if (options?.Landscape ?? false)
                 {
-                    int m = options?.Margin * c ?? 0;
-                    int n = options?.MarginRight * c ?? 0;
-                    (w, h) = (h, w + m + n);
-                    t = $"svg{{padding-left:{m}px;padding-right:{n}px;transform-origin:top left;transform:rotate(-90deg) translateX(-{h}px)}}";
+                    canvas.Translate(0, width + n);
+                    canvas.RotateDegrees(-90);
                 }
-                var playwright = await Playwright.CreateAsync();
-                var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Channel = "chrome", Headless = true });
-                var page = await browser.NewPageAsync(new BrowserNewPageOptions { ViewportSize = new ViewportSize { Width = w, Height = h } });
-                await page.SetContentAsync($"<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>*{{margin:0;background:transparent}}{t}</style></head><body>{svg}</body></html>");
-                png = "data:image/png;base64," + Convert.ToBase64String(await page.ScreenshotAsync(new PageScreenshotOptions { Type = ScreenshotType.Png, OmitBackground = true }));
-                await browser.CloseAsync();
-            }
-            return png;
-        }
-        */
-        /*
-        // Puppeteer
-        private async Task<string> Base64Png(string svg, PrintOption options = null)
-        {
-            string png = "";
-            int c = Svg.CharWidth;
-            Match match = Regex.Match(svg, @"width=""(\d+)px"" height=""(\d+)px""");
-            if (match.Success)
-            {
-                int.TryParse(match.Groups[1].Value, out int w);
-                int.TryParse(match.Groups[2].Value, out int h);
-                string t = "";
-                if (options?.Landscape ?? false)
+
+                // <svg><g>
+                foreach (var group in doc.Children.OfType<SvgGroup>())
                 {
-                    int m = options?.Margin * c ?? 0;
-                    int n = options?.MarginRight * c ?? 0;
-                    (w, h) = (h, w + m + n);
-                    t = $"svg{{padding-left:{m}px;padding-right:{n}px;transform-origin:top left;transform:rotate(-90deg) translateX(-{h}px)}}";
+                    string lang = group.TryGetAttribute("lang", out string _lang) ? _lang.ToLower() : "en";
+                    SKTypeface typeface = Typefaces.TryGetValue(lang, out var _typeface) ? _typeface : SKTypeface.Default;
+                    int size = int.Parse(group.TryGetAttribute("font-size", out string _size) ? _size : "24");
+                    using (SKFont font = new SKFont(typeface, size))
+                    using (SKPaint fgNormal = new SKPaint { Color = SKColors.Black, IsAntialias = true })
+                    using (SKPaint fgBold = new SKPaint { Color = SKColors.Black, IsAntialias = true, StrokeWidth = 1f, Style = SKPaintStyle.StrokeAndFill })
+                    using (SKPaint ivNormal = new SKPaint { Color = SKColors.Black, IsAntialias = true, BlendMode = SKBlendMode.DstOut })
+                    using (SKPaint ivBold = new SKPaint { Color = SKColors.Black, IsAntialias = true, StrokeWidth = 1f, Style = SKPaintStyle.StrokeAndFill, BlendMode = SKBlendMode.DstOut })
+                    {
+                        font.GetFontMetrics(out SKFontMetrics metrics);
+
+                        // <svg><g><g>
+                        foreach (var g in group.Children.OfType<SvgGroup>())
+                        {
+                            float x0 = 0, y0 = 0;
+                            if (g.Transforms.FirstOrDefault() is Svg.Transforms.SvgTranslate translate)
+                            {
+                                x0 = translate.X;
+                                y0 = translate.Y;
+                            }
+
+                            // <svg><g><g><text>
+                            var texts = g.Children.OfType<SvgText>().ToList();
+                            foreach (var text in texts)
+                            {
+                                float y1 = int.Parse(text.TryGetAttribute("y", out string _y1) ? _y1 : "0");
+                                bool ul = text.ContainsAttribute("text-decoration");
+                                bool em = text.ContainsAttribute("stroke");
+                                bool iv = text.ContainsAttribute("filter");
+                                float sx = 1, sy = 1;
+                                if (text.Transforms?.FirstOrDefault() is Svg.Transforms.SvgScale scale)
+                                {
+                                    sx = scale.X;
+                                    sy = scale.Y;
+                                }
+
+                                // <svg><g><g><text><tspan>
+                                foreach (var tspan in text.Children.OfType<SvgTextSpan>())
+                                {
+                                    SKPaint normal = fgNormal;
+                                    SKPaint bold = fgBold;
+                                    float x = x0 / sx + int.Parse(tspan.TryGetAttribute("x", out string _x) ? _x : "0");
+                                    float y = y0 / sy + y1;
+                                    string t = tspan.Content;
+                                    float w = c * printer.MeasureText(t, Encodings.TryGetValue(lang, out string _l) ? _l : "multilingual");
+                                    float h = c + c;
+                                    float u = lang == "ja" ? 0 : 2;
+                                    canvas.Save();
+                                    canvas.Scale(sx, sy);
+                                    if (iv)
+                                    {
+                                        canvas.DrawRect(x - w / 2f, y - h, w, h, normal);
+                                        normal = ivNormal;
+                                        bold = ivBold;
+                                    }
+                                    canvas.DrawText(t, x, y - metrics.Descent, SKTextAlign.Center, font, em ? bold : normal);
+                                    if (ul)
+                                    {
+                                        canvas.DrawRect(x - w / 2f, y - u - 1, w, 1, em ? bold : normal);
+                                    }
+                                    canvas.Restore();
+                                }
+                                if (text.Parent is SvgElement parent)
+                                {
+                                    parent.Children.Remove(text);
+                                }
+                            }
+                        }
+                    }
                 }
-                var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+
+                using (var skSvg = SKSvg.CreateFromSvgDocument(doc))
                 {
-                    Channel = ChromeReleaseChannel.Stable,
-                    Headless = true,
-                    DefaultViewport = new ViewPortOptions { Width = w, Height = h }
-                });
-                var page = await browser.NewPageAsync();
-                await page.SetContentAsync($"<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>*{{margin:0;background:transparent}}{t}</style></head><body>{svg}</body></html>");
-                png = "data:image/png;base64," + await page.ScreenshotBase64Async();
-                await browser.CloseAsync();
+                    var picture = skSvg.Picture;
+                    if (picture != null)
+                    {
+                        canvas.DrawPicture(picture, 0, 0);
+                    }
+                }
+
+                using (var image = surface.Snapshot())
+                using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                {
+                    string base64 = Convert.ToBase64String(data.ToArray());
+                    return $"data:image/png;base64,{base64}";
+                }
             }
-            return png;
-        }
-        */
-        private Task<string> Base64Png(string svg, PrintOption options = null)
-        {
-            return Task.FromResult("");
         }
 
         private Base CreatePrinter(string type)
