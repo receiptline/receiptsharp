@@ -337,7 +337,7 @@ namespace ReceiptSharp
             {
                 matrix[r, 8] = matrix[8, c] = (byte)(d >> i & 1);
                 r += i == 5 ? 2 : i == 7 ? size - 15 : 1;
-                c -= i == 7 ? size - 15 : i == 8 ? 2 : 1;
+                c -= i == 8 ? 2 : i == 7 ? size - 15 : 1;
             }
             matrix[size - 8, 8] = 1;
         }
@@ -548,7 +548,11 @@ namespace ReceiptSharp
         public static byte[,] Generate(SymbolData symbol)
         {
             string level = symbol.Level;
-            byte[] utf8 = new UTF8Encoding(false).GetBytes(symbol.Data).Take(GetCapacity(level, 40)).ToArray();
+            byte[] utf8 = new UTF8Encoding(false).GetBytes(symbol.Data);
+            if (utf8.Length == 0 || utf8.Length > GetCapacity(level, 40))
+            {
+                return new byte[0, 0];
+            }
             int version = SelectVersion(utf8, level);
             byte[] data = CreateData(utf8, level, version);
             int mask = SelectMask(data, level, version);
@@ -559,7 +563,7 @@ namespace ReceiptSharp
                 byte[,] m = new byte[size + 8, size + 8];
                 for (int i = 0; i < size; i++)
                 {
-                    for (int j = 0; i < size; j++)
+                    for (int j = 0; j < size; j++)
                     {
                         m[i + 4, j + 4] = matrix[i, j];
                     }

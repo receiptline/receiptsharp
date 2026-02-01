@@ -192,7 +192,7 @@ namespace ReceiptSharp
                 Border = 1,
                 Width = new int[0],
                 Align = LineAlign.Center,
-                Option = new SymbolData() { Type = "code128", Width = 2, Height = 72, Hri = false, Cell = 3, Level = "l", QuietZone = false },
+                Option = new SymbolData(),
                 Line = LineMode.Waiting,
                 Rules = new RuledLine() { Left = 0, Width = 0, Right = 0, Widths = new int[0] }
             };

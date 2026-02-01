@@ -20,14 +20,14 @@ namespace ReceiptSharp
 {
     public class SymbolData
     {
-        public string Data { get; set; }
-        public string Type { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public bool Hri { get; set; }
-        public int Cell { get; set; }
-        public string Level { get; set; }
-        public bool QuietZone { get; set; }
+        public string Data { get; set; } = string.Empty;
+        public string Type { get; set; } = "code128";
+        public int Width { get; set; } = 2;
+        public int Height { get; set; } = 72;
+        public bool Hri { get; set; } = false;
+        public int Cell { get; set; } = 3;
+        public string Level { get; set; } = "l";
+        public bool QuietZone { get; set; } = false;
         public SymbolData Clone()
         {
             return (SymbolData)MemberwiseClone();
