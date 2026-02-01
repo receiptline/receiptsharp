@@ -84,7 +84,7 @@ namespace ReceiptSharp.Printers
                 for (int i = 0; i < 128; i++)
                 {
                     char c = s[i];
-                    if (!MultiTable.ContainsKey(c))
+                    if (!MultiTable.TryGetValue(c, out _))
                     {
                         MultiTable[c] = new string(new char[] { p, (char)(i + 128) });
                     }

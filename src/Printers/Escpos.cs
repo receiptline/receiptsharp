@@ -63,9 +63,8 @@ namespace ReceiptSharp.Printers
                 char c = text[i];
                 if (c > '\u007f')
                 {
-                    if (MultiTable.ContainsKey(c))
+                    if (MultiTable.TryGetValue(c, out string d))
                     {
-                        string d = MultiTable[c];
                         char q = d[0];
                         if (p == q)
                         {

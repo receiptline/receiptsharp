@@ -324,15 +324,15 @@ namespace ReceiptSharp
                 if (length == 1)
                 {
                     // parse text property
-                    if (property.ContainsKey("text"))
+                    if (property.TryGetValue("text", out string _text))
                     {
-                        string c = property["text"].ToLower();
+                        string c = _text.ToLower();
                         State.Wrap = !Regex.IsMatch(c, @"^nowrap$");
                     }
                     // parse border property
-                    if (property.ContainsKey("border"))
+                    if (property.TryGetValue("border", out string _border))
                     {
-                        string c = property["border"].ToLower();
+                        string c = _border.ToLower();
                         int previous = State.Border;
                         State.Border = Regex.IsMatch(c, @"^(line|space|none)$") ? (int)Enum.Parse(typeof(Border), c, true) : Regex.IsMatch(c, @"^\d+$") ? int.Parse(c) : 1;
                         // start rules
@@ -347,21 +347,21 @@ namespace ReceiptSharp
                         }
                     }
                     // parse width property
-                    if (property.ContainsKey("width"))
+                    if (property.TryGetValue("width", out string _width))
                     {
-                        string[] widths = Regex.Split(property["width"].ToLower(), @"[\t ]+|,");
+                        string[] widths = Regex.Split(_width.ToLower(), @"[\t ]+|,");
                         State.Width = Array.Exists(widths, t => Regex.IsMatch(t, @"^auto$")) ? new int[0] : widths.Select(c => Regex.IsMatch(c, @"^\*$") ? -1 : Regex.IsMatch(c, @"^\d+$") ? int.Parse(c) : 0).ToArray();
                     }
                     // parse align property
-                    if (property.ContainsKey("align"))
+                    if (property.TryGetValue("align", out string _align))
                     {
-                        string c = property["align"].ToLower();
+                        string c = _align.ToLower();
                         State.Align = (LineAlign)Enum.Parse(typeof(LineAlign), Regex.IsMatch(c, @"^(left|center|right)$") ? c : "center", true);
                     }
                     // parse option property
-                    if (property.ContainsKey("option"))
+                    if (property.TryGetValue("option", out string _option))
                     {
-                        string[] options = Regex.Split(property["option"].ToLower(), @"[\t ]+|,");
+                        string[] options = Regex.Split(_option.ToLower(), @"[\t ]+|,");
                         State.Option = new SymbolData()
                         {
                             Type = Array.Find(options, t => Regex.IsMatch(t, @"^(upc|ean|jan|code39|itf|codabar|nw7|code93|code128|qrcode)$")) ?? "code128",
@@ -374,11 +374,11 @@ namespace ReceiptSharp
                         };
                     }
                     // parse code property
-                    if (property.ContainsKey("code"))
+                    if (property.TryGetValue("code", out string _code))
                     {
                         result.Code = new SymbolData()
                         {
-                            Data = property["code"],
+                            Data = _code,
                             Type = State.Option.Type,
                             Width = State.Option.Width,
                             Height = State.Option.Height,
@@ -389,9 +389,9 @@ namespace ReceiptSharp
                         };
                     }
                     // parse image property
-                    if (property.ContainsKey("image"))
+                    if (property.TryGetValue("image", out string _image))
                     {
-                        string c = Regex.Replace(property["image"], @"=.*|[^A-Za-z0-9+/]", "");
+                        string c = Regex.Replace(_image, @"=.*|[^A-Za-z0-9+/]", "");
                         switch (c.Length % 4)
                         {
                             case 1:
@@ -409,14 +409,14 @@ namespace ReceiptSharp
                         }
                     }
                     // parse command property
-                    if (property.ContainsKey("command"))
+                    if (property.TryGetValue("command", out string _command))
                     {
-                        result.Command = property["command"];
+                        result.Command = _command;
                     }
                     // parse comment property
-                    if (property.ContainsKey("comment"))
+                    if (property.TryGetValue("comment", out string _comment))
                     {
-                        result.Comment = property["comment"];
+                        result.Comment = _comment;
                     }
                 }
             }
@@ -987,7 +987,7 @@ namespace ReceiptSharp
                 Landscape =  param1['v'],
                 Resolution = r == 180 ? r : 203,
                 Cpl = c >= 24 && c <= 96 ? c : 48,
-                Encoding = Encodings.ContainsKey(l) ? Encodings[l] : "multilingual",
+                Encoding = Encodings.TryGetValue(l, out string _l) ? _l : "multilingual",
                 Gradient = !(b >= 0 && b <= 255),
                 Gamma = g >= 0.1 && g <= 10.0 ? g : 1.0,
                 Threshold = b >= 0 && b <= 255 ? b : 128,
