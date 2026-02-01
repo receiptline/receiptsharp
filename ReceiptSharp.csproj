@@ -5,7 +5,7 @@
     <AssemblyName>ReceiptSharp</AssemblyName>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>ReceiptSharp</PackageId>
-    <Version>1.0.0</Version>
+    <Version>2.0.0</Version>
     <Authors>receiptline</Authors>
     <Company>Open Foodservice System Consortium</Company>
     <Product>ReceiptSharp</Product>
@@ -21,10 +21,29 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+    <None Remove="src\Fonts\en\CourierPrime-Regular.ttf" />
+    <None Remove="src\Fonts\ja\BIZUDGothic-Regular.ttf" />
+    <None Remove="src\Fonts\ko\NotoSansMonoCJKkr-Regular.otf" />
+    <None Remove="src\Fonts\zh\NotoSansMonoCJKsc-Regular.otf" />
+    <None Remove="src\Fonts\zh\NotoSansMonoCJKtc-Regular.otf" />
+	<None Remove="src\Fonts\th\Sarabun-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="src\Fonts\en\CourierPrime-Regular.ttf" />
+    <EmbeddedResource Include="src\Fonts\ja\BIZUDGothic-Regular.ttf" />
+    <EmbeddedResource Include="src\Fonts\ko\NotoSansMonoCJKkr-Regular.otf" />
+    <EmbeddedResource Include="src\Fonts\zh\NotoSansMonoCJKsc-Regular.otf" />
+    <EmbeddedResource Include="src\Fonts\zh\NotoSansMonoCJKtc-Regular.otf" />
+    <EmbeddedResource Include="src\Fonts\th\Sarabun-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" PrivateAssets="all" />
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
-    <PackageReference Include="System.IO.Ports" Version="10.0.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
+    <PackageReference Include="Svg.Skia" Version="3.4.1" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.2" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>

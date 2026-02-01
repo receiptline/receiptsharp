@@ -248,7 +248,7 @@ The Print() method prints a receipt markdown text.
     - Range (right): `0`-`24`
     - Default: `0,0`
   - `-u`: Upside down
-  - `-i`: Print as image _Not implemented_
+  - `-i`: Print as image
   - `-n`: No paper cut
   - `-b <threshold>`: Image thresholding
     - Range: `0`-`255`
@@ -356,7 +356,7 @@ Console.WriteLine(txt);
 |Name|Description|  
 |---|---|
 |ToSvg()|Convert receipt markdown to SVG.|
-|ToPng()|Convert receipt markdown to PNG. _Not implemented_|
+|ToPng()|Convert receipt markdown to PNG.|
 |ToText()|Convert receipt markdown to text.|
 |ToCommand()|Convert receipt markdown to printer commands.|
 |ToString()|Return string representing this object.|
@@ -490,6 +490,124 @@ The ToString() method returns a string representing the receipt markdown text.
 ### Returns
 
 - A string representing the receipt markdown text.
+
+
+
+# BarcodeGenerator Class
+
+Namespace: ReceiptSharp  
+
+Generate barcodes.  
+
+
+## Examples
+
+```csharp
+SymbolData bar = new SymbolData() { Data = "1234", Type = "code39", Width = 2, QuietZone = true };
+BarcodeForm barform = BarcodeGenerator.Generate(bar);
+```
+
+
+## Methods
+
+|Name|Description|  
+|---|---|
+|Generate(SymbolData)|Create a barcode.|
+
+
+## BarcodeGenerator.Generate Method
+
+```csharp
+public BarcodeForm Generate(SymbolData symbol)
+```
+
+The Generate() static method creates a barcode.  
+
+### Parameters
+
+- `symbol` &lt;SymbolData&gt;: Barcode data
+  - `Data` &lt;string&gt;: Data to encode
+  - `Type` &lt;string&gt;: Barcode type
+    - `upc`: UPC-A, UPC-E (check digit can be omitted)
+    - `ean`, `jan`: EAN-13, EAN-8 (check digit can be omitted)
+    - `code39`: CODE39
+    - `itf`: Interleaved 2 of 5
+    - `codabar`, `nw7`: Codabar (NW-7)
+    - `code93`: CODE93
+    - `code128`: CODE128
+    - Default: `code128`
+  - `Width` &lt;int&gt;: Module width
+    - Range: `2`-`4`
+    - Default: `2`
+  - `Height` &lt;int&gt;: Module height
+    - Range: `24`-`240`
+    - Default: `72`
+  - `Hri` &lt;bool&gt;: Human readable interpretation
+    - Default: `false`
+  - `QuietZone` &lt;bool&gt;: Quiet zone
+    - Default: `false`
+
+### Returns
+
+- &lt;BarCodeForm&gt;: Barcode form
+  - `Length` &lt;int&gt;: Barcode width (sum of widths)
+  - `Height` &lt;int&gt;: Barcode height
+  - `Widths` &lt;int[]&gt;: Bar/space width (quiet zone, bar, space, ... , bar, quiet zone)
+  - `Hri` &lt;bool&gt;: Human readable interpretation
+  - `Text` &lt;string&gt;: Human readable interpretation text
+
+
+
+# QRCodeGenerator Class
+
+Namespace: ReceiptSharp  
+
+Generate QR Codes.  
+
+
+## Examples
+
+```csharp
+SymbolData qr = new SymbolData() { Data = "abcdefgh", Level = "m", QuietZone = true };
+byte[,] qrform = QRCodeGenerator.Generate(qr);
+```
+
+
+## Methods
+
+|Name|Description|  
+|---|---|
+|Generate(SymbolData)|Create a QR Code.|
+
+
+## QRCodeGenerator.Generate Method
+
+```csharp
+public byte[,] Generate(SymbolData symbol)
+```
+
+The Generate() static method creates a QR Code.  
+
+### Parameters
+
+- `Symbol` &lt;SymbolData&gt;: QR Code data
+  - `Data` &lt;string&gt;: Data to encode
+  - `Level` &lt;string&gt;: Error correction level
+    - `l`: Low
+    - `m`: Middle
+    - `q`: Quartile
+    - `h`: High
+    - Default: `l`
+  - `QuietZone` &lt;bool&gt;: Quiet zone
+    - Default: `false`
+
+### Returns
+
+- &lt;byte[,]&gt;: QR Code form (matrix of dark and light modules)
+    - `0`: light
+    - `1`: dark
+
+QR Code is a registered trademark of DENSO WAVE INCORPORATED.  
 
 
 
