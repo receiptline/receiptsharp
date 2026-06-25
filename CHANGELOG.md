@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.1] - 2026-06-25
+### Changed
+- Icons, favicons, and logos
+
 ## [2.0.0] - 2026-02-01
 ### Added
 - PNG output
