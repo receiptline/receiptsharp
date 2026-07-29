@@ -613,10 +613,7 @@ QR Code is a registered trademark of DENSO WAVE INCORPORATED.
 
 # Receipt Markdown
 
-This language conforms to the OFSC ReceiptLine Specification.  
-https://www.ofsc.or.jp/receiptline/en/  
-
-ReceiptLine is the receipt description language that expresses the output image of small roll paper.  
+Receipt markdown is the receipt description language that expresses the output image of small roll paper.  
 It supports printing paper receipts using a receipt printer and displaying electronic receipts on a POS system or smartphone.  
 It can be described simply with receipt markdown text data that does not depend on the paper width.  
 

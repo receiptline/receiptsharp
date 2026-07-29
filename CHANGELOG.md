@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.2] - 2026-07-29
+### Added
+- Project name
+
 ## [2.0.1] - 2026-06-25
 ### Changed
 - Icons, favicons, and logos

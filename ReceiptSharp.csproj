@@ -5,12 +5,12 @@
     <AssemblyName>ReceiptSharp</AssemblyName>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>ReceiptSharp</PackageId>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <Authors>receiptline</Authors>
     <Company>Receipt Project</Company>
     <Product>ReceiptSharp</Product>
     <Description>.NET printing library for receipt printers, simple and easy with receipt markdown, printer status support.</Description>
-    <Copyright>© 2025 Open Foodservice System Consortium © 2026 Receipt Project</Copyright>
+    <Copyright>© 2025 Open Foodservice System Consortium © 2026 OpenReceipt Project</Copyright>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/receiptline/receiptsharp</RepositoryUrl>
