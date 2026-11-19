@@ -20,6 +20,7 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using SkiaSharp;
+using System.Text;
 
 namespace ReceiptSharp.Printers
 {
@@ -47,7 +48,7 @@ namespace ReceiptSharp.Printers
             {
                 int h = Math.Min(Split, img.Height - z);
                 int l = (w + 7 >> 3) * h + 10;
-                string r = $"\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}";
+                StringBuilder r = new StringBuilder($"\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}");
                 for (int y = 0; y < h; y++)
                 {
                     int i = 0, e = 0;
@@ -85,10 +86,10 @@ namespace ReceiptSharp.Printers
                                 }
                             }
                         }
-                        r += (char)b;
+                        r.Append((char)b);
                     }
-                    r += $"\u001d(L{(char)2}{(char)0}{(char)48}{(char)50}";
-                    s.Add(r);
+                    r.Append($"\u001d(L{(char)2}{(char)0}{(char)48}{(char)50}");
+                    s.Add(r.ToString());
                 }
                 if (UpsideDown)
                 {
@@ -100,7 +101,7 @@ namespace ReceiptSharp.Printers
         // print QR Code: GS ( k pL pH cn fn n1 n2 GS ( k pL pH cn fn n GS ( k pL pH cn fn n GS ( k pL pH cn fn m d1 ... dk GS ( k pL pH cn fn m
         public override string Qrcode(SymbolData symbol, string encoding)
         {
-            string r = UpsideDown && Alignment == 2 ? Area(Right, Width, Left)  : "";
+            StringBuilder r = new StringBuilder(UpsideDown && Alignment == 2 ? Area(Right, Width, Left)  : "");
             if (symbol.Data.Length > 0)
             {
                 byte[,] matrix = QRCodeGenerator.Generate(symbol);
@@ -108,10 +109,10 @@ namespace ReceiptSharp.Printers
                 int w = size * symbol.Cell;
                 int h = w;
                 int l = (w + 7 >> 3) * h + 10;
-                r += $"\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}";
+                r.Append($"\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}");
                 for (int i = 0; i < size; i++)
                 {
-                    string d = "";
+                    StringBuilder d = new StringBuilder();
                     for (int j = 0; j < w; j += 8)
                     {
                         int b = 0;
@@ -123,16 +124,16 @@ namespace ReceiptSharp.Printers
                                 b |= 128 >> p;
                             }
                         }
-                        d += (char)b;
+                        d.Append((char)b);
                     }
                     for (int k = 0; k < symbol.Cell; k++)
                     {
-                        r += d;
+                        r.Append(d);
                     }
                 }
-                r += $"\u001d(L{(char)2}{(char)0}{(char)48}{(char)50}";
+                r.Append($"\u001d(L{(char)2}{(char)0}{(char)48}{(char)50}");
             }
-            return r;
+            return r.ToString();
         }
     }
 }

@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using SkiaSharp;
+using System.Text;
 
 namespace ReceiptSharp.Printers
 {
@@ -187,7 +188,7 @@ namespace ReceiptSharp.Printers
             for (int z = 0; z < img.Height; z += Split)
             {
                 int h = Math.Min(Split, img.Height - z);
-                string r = $"\u001b\x001dS{(char)1}{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}{(char)0}";
+                StringBuilder r = new StringBuilder($"\u001b\x001dS{(char)1}{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}{(char)0}");
                 for (int y = 0; y < h; y++)
                 {
                     int i = 0, e = 0;
@@ -225,10 +226,10 @@ namespace ReceiptSharp.Printers
                                 }
                             }
                         }
-                        r += (char)b;
+                        r.Append((char)b);
                     }
                 }
-                s.Add(r);
+                s.Add(r.ToString());
             }
             if (UpsideDown)
             {
@@ -239,7 +240,7 @@ namespace ReceiptSharp.Printers
         // print QR Code: ESC GS y S 0 n ESC GS y S 1 n ESC GS y S 2 n ESC GS y D 1 m nL nH d1 d2 ... dk ESC GS y P
         public override string Qrcode(SymbolData symbol, string encoding)
         {
-            string r = "";
+            StringBuilder r = new StringBuilder("");
             if (symbol.Data.Length > 0)
             {
                 byte[,] matrix = QRCodeGenerator.Generate(symbol);
@@ -247,10 +248,10 @@ namespace ReceiptSharp.Printers
                 int w = size * symbol.Cell;
                 int h = w;
                 int l = w + 7 >> 3;
-                r += $"\u001b\u001dS{(char)1}{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}{(char)0}";
+                r.Append($"\u001b\u001dS{(char)1}{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}{(char)0}");
                 for (int i = 0; i < size; i++)
                 {
-                    string d = "";
+                    StringBuilder d = new StringBuilder();
                     for (int j = 0; j < w; j += 8)
                     {
                         int b = 0;
@@ -262,15 +263,15 @@ namespace ReceiptSharp.Printers
                                 b |= 128 >> p;
                             }
                         }
-                        d += (char)b;
+                        d.Append((char)b);
                     }
                     for (int k = 0; k < symbol.Cell; k++)
                     {
-                        r += d;
+                        r.Append(d);
                     }
                 }
             }
-            return r;
+            return r.ToString();
         }
         // QR Code error correction levels:
         protected Dictionary<string, char> QrLevel = new Dictionary<string, char>()

@@ -20,6 +20,7 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using SkiaSharp;
+using System.Text;
 
 namespace ReceiptSharp.Printers
 {
@@ -47,7 +48,7 @@ namespace ReceiptSharp.Printers
             int j = 0;
             for (int y = 0; y < img.Height; y += 24)
             {
-                string r = $"\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}";
+                StringBuilder r = new StringBuilder($"\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}");
                 for (int z = 0; z < 24; z++)
                 {
                     if (y + z < h)
@@ -87,12 +88,12 @@ namespace ReceiptSharp.Printers
                                     }
                                 }
                             }
-                            r += (char)b;
+                            r.Append((char)b);
                         }
                     }
                     else
                     {
-                        r += new string('\u0000', l);
+                        r.Append(new string('\u0000', l));
                     }
                 }
                 s.Add(r + "\u000a");
@@ -106,7 +107,7 @@ namespace ReceiptSharp.Printers
         // print QR Code: ESC GS y S 0 n ESC GS y S 1 n ESC GS y S 2 n ESC GS y D 1 m nL nH d1 d2 ... dk ESC GS y P
         public override string Qrcode(SymbolData symbol, string encoding)
         {
-            string r = "";
+            StringBuilder r = new StringBuilder("");
             if (symbol.Data.Length > 0)
             {
                 byte[,] matrix = QRCodeGenerator.Generate(symbol);
@@ -116,7 +117,7 @@ namespace ReceiptSharp.Printers
                 List<string> s = new List<string>();
                 for (int i = 0; i < size; i++)
                 {
-                    string d = "";
+                    StringBuilder d = new StringBuilder();
                     for (int j = 0; j < w; j += 8)
                     {
                         int b = 0;
@@ -128,23 +129,23 @@ namespace ReceiptSharp.Printers
                                 b |= 128 >> p;
                             }
                         }
-                        d += (char)b;
+                        d.Append((char)b);
                     }
                     for (int k = 0; k < symbol.Cell; k++)
                     {
-                        s.Add(d);
+                        s.Add(d.ToString());
                     }
                 }
                 while (s.Count % 24 != 0)
                 {
                     string d = new string('\u0000', l);
-                    s.Add(d);
+                    s.Add(d.ToString());
                 }
                 if (UpsideDown)
                 {
                     s.Reverse();
                 }
-                r += "\u001b0";
+                r.Append("\u001b0");
                 for (int k = 0; k < s.Count; k += 24)
                 {
                     var a = s.GetRange(k, 24);
@@ -152,11 +153,11 @@ namespace ReceiptSharp.Printers
                     {
                         a.Reverse();
                     }
-                    r += $"\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}{string.Join("", a.ToArray())}\u000a";
+                    r.Append($"\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}{string.Join("", a.ToArray())}\u000a");
                 }
-                r += Spacing ? "\u001bz1" : "\u001b0";
+                r.Append(Spacing ? "\u001bz1" : "\u001b0");
             }
-            return r;
+            return r.ToString();
         }
     }
 }

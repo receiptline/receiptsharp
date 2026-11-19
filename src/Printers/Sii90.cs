@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using SkiaSharp;
+using System.Text;
 
 namespace ReceiptSharp.Printers
 {
@@ -99,14 +100,14 @@ namespace ReceiptSharp.Printers
             int w = img.Width;
             int px = Left * CharWidth + Alignment * (Width * CharWidth - w) / 2;
             int py = Position;
-            string r = "";
+            StringBuilder r = new StringBuilder("");
             int[] d = new int[w];
             int j = 0;
             for (int z = 0; z < img.Height; z += Split)
             {
                 int h = Math.Min(Split, img.Height - z);
                 int l = (w + 7 >> 3) * h + 10;
-                r += $"\u001d${(char)(py + h & 255)}{(char)(py + h >> 8 & 255)}\u001b${(char)(px & 255)}{(char)(px >> 8 & 255)}\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}";
+                r.Append($"\u001d${(char)(py + h & 255)}{(char)(py + h >> 8 & 255)}\u001b${(char)(px & 255)}{(char)(px >> 8 & 255)}\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}");
                 for (int y = 0; y < h; y++)
                 {
                     int i = 0, e = 0;
@@ -144,7 +145,7 @@ namespace ReceiptSharp.Printers
                                 }
                             }
                         }
-                        r += (char)b;
+                        r.Append((char)b);
                     }
                 }
             }
@@ -163,12 +164,12 @@ namespace ReceiptSharp.Printers
                 int h = w;
                 int x = Left * CharWidth + Alignment * (Width * CharWidth - w) / 2;
                 int y = Position;
-                string r = $"\u001d${(char)(y + h & 255)}{(char)(y + h >> 8 & 255)}\u001b${(char)(x & 255)}{(char)(x >> 8 & 255)}";
+                StringBuilder r = new StringBuilder($"\u001d${(char)(y + h & 255)}{(char)(y + h >> 8 & 255)}\u001b${(char)(x & 255)}{(char)(x >> 8 & 255)}");
                 int l = (w + 7 >> 3) * h + 10;
-                r += $"\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}";
+                r.Append($"\u001d8L{(char)(l & 255)}{(char)(l >> 8 & 255)}{(char)(l >> 16 & 255)}{(char)(l >> 24 & 255)}{(char)48}{(char)112}{(char)48}{(char)1}{(char)1}{(char)49}{(char)(w & 255)}{(char)(w >> 8 & 255)}{(char)(h & 255)}{(char)(h >> 8 & 255)}");
                 for (int i = 0; i < size; i++)
                 {
-                    string d = "";
+                    StringBuilder d = new StringBuilder();
                     for (int j = 0; j < w; j += 8)
                     {
                         int b = 0;
@@ -180,11 +181,11 @@ namespace ReceiptSharp.Printers
                                 b |= 128 >> p;
                             }
                         }
-                        d += (char)b;
+                        d.Append((char)b);
                     }
                     for (int k = 0; k < symbol.Cell; k++)
                     {
-                        r += d;
+                        r.Append(d);
                     }
                 }
                 Buffer += r;

@@ -19,6 +19,7 @@ limitations under the License.
 
 using System;
 using SkiaSharp;
+using System.Text;
 
 namespace ReceiptSharp.Printers
 {
@@ -84,7 +85,7 @@ namespace ReceiptSharp.Printers
         // print image: b n1 n2 data
         public override string Image(string image)
         {
-            string r = "";
+            StringBuilder r = new StringBuilder("");
             byte[] png = Convert.FromBase64String(image);
             SKBitmap img = SKBitmap.Decode(png);
             byte[] imgdata = img.Bytes;
@@ -96,7 +97,7 @@ namespace ReceiptSharp.Printers
             for (int y = 0; y < img.Height; y++)
             {
                 int i = 0, e = 0;
-                r += $"b{(char)(l & 255)}{(char)(l >> 8 & 255)}";
+                r.Append($"b{(char)(l & 255)}{(char)(l >> 8 & 255)}");
                 for (int x = 0; x < m + w; x += 8)
                 {
                     int b = 0;
@@ -134,10 +135,10 @@ namespace ReceiptSharp.Printers
                             }
                         }
                     }
-                    r += (char)b;
+                    r.Append((char)b);
                 }
             }
-            return r;
+            return r.ToString();
         }
     }
 }

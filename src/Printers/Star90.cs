@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using SkiaSharp;
+using System.Text;
 
 namespace ReceiptSharp.Printers
 {
@@ -165,11 +166,11 @@ namespace ReceiptSharp.Printers
             int py = Position + CharWidth * 40 / 24;
             int[] d = new int[w];
             int l = w + 7 >> 3;
-            string r = $"\u001b0\u001b\u001dP4{(char)(py & 255)}{(char)(py >> 8 & 255)}";
+            StringBuilder r = new StringBuilder($"\u001b0\u001b\u001dP4{(char)(py & 255)}{(char)(py >> 8 & 255)}");
             int j = 0;
             for (int y = 0; y < h; y += 24)
             {
-                r += $"\u001b\u001dA{(char)(px & 255)}{(char)(px >> 8 & 255)}\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}";
+                r.Append($"\u001b\u001dA{(char)(px & 255)}{(char)(px >> 8 & 255)}\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}");
                 for (int z = 0; z < 24; z++)
                 {
                     if (y + z < h)
@@ -209,17 +210,17 @@ namespace ReceiptSharp.Printers
                                     }
                                 }
                             }
-                            r += (char)b;
+                            r.Append((char)b);
                         }
                     }
                     else
                     {
-                        r += new string('\u0000', l);
+                        r.Append(new string('\u0000', l));
                     }
                 }
-                r += "\u000a";
+                r.Append("\u000a");
             }
-            r += Spacing ? "\u001bz1" : "\u001b0";
+            r.Append(Spacing ? "\u001bz1" : "\u001b0");
             Buffer += r;
             Position += h;
             return "";
@@ -236,11 +237,11 @@ namespace ReceiptSharp.Printers
                 int x = Left * CharWidth + Alignment * (Width * CharWidth - w) / 2;
                 int y = Position + CharWidth * 40 / 24;
                 int l = w + 7 >> 3;
-                string r = $"\u001b0\u001b\u001dP4{(char)(y & 255)}{(char)(y >> 8 & 255)}";
+                StringBuilder r = new StringBuilder($"\u001b0\u001b\u001dP4{(char)(y & 255)}{(char)(y >> 8 & 255)}");
                 List<string> s = new List<string>();
                 for (int i = 0; i < size; i++)
                 {
-                    string d = "";
+                    StringBuilder d = new StringBuilder();
                     for (int j = 0; j < w; j += 8)
                     {
                         int b = 0;
@@ -252,24 +253,24 @@ namespace ReceiptSharp.Printers
                                 b |= 128 >> p;
                             }
                         }
-                        d += (char)b;
+                        d.Append((char)b);
                     }
                     for (int k = 0; k < symbol.Cell; k++)
                     {
-                        s.Add(d);
+                        s.Add(d.ToString());
                     }
                 }
                 while (s.Count % 24 != 0)
                 {
                     string d = new string('\u0000', l);
-                    s.Add(d);
+                    s.Add(d.ToString());
                 }
                 for (int k = 0; k < s.Count; k += 24)
                 {
                     var a = s.GetRange(k, 24);
-                    r += $"\u001b\u001dA{(char)(x & 255)}{(char)(x >> 8 & 255)}\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}{string.Join("", a.ToArray())}\u000a";
+                    r.Append($"\u001b\u001dA{(char)(x & 255)}{(char)(x >> 8 & 255)}\u001bk{(char)(l & 255)}{(char)(l >> 8 & 255)}{string.Join("", a.ToArray())}\u000a");
                 }
-                r += Spacing ? "\u001bz1" : "\u001b0";
+                r.Append(Spacing ? "\u001bz1" : "\u001b0");
                 Buffer += r;
                 Position += h;
             }
